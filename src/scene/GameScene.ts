@@ -12,6 +12,7 @@ import {
   Scene,
   WebGLRenderer,
 } from "three";
+import GameEntity from "../entities/GameEntity";
 
 class GameScene {
   //singleton pattern
@@ -27,6 +28,10 @@ class GameScene {
 
   // threejs scene
   private readonly _scene = new Scene();
+
+  // game entities array
+
+  private _gameEntities: GameEntity[] = [];
 
   private constructor() {
     this._width = window.innerWidth;
@@ -63,11 +68,13 @@ class GameScene {
     this._camera.updateProjectionMatrix();
   };
 
-  public load = () => {
-    const geometry = new BoxGeometry(1, 1, 1);
-    const material = new MeshBasicMaterial({ color: 0x00ff00 });
-    const cube = new Mesh(geometry, material);
-    this._scene.add(cube);
+  public load = async () => {
+    // load game entities
+    for (let index = 0; index < this._gameEntities.length; index++) {
+      const element = this._gameEntities[index];
+      await element.load();
+      this._scene.add(element.mesh);
+    }
   };
   public render = () => {
     requestAnimationFrame(this.render);

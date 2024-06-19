@@ -1,5 +1,5 @@
 import "./style.css";
 import GameScene from "./scene/GameScene";
 
-GameScene.instance.load();
+await GameScene.instance.load();
 GameScene.instance.render();
