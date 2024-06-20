@@ -5,14 +5,16 @@
  */
 
 import {
-  BoxGeometry,
-  Mesh,
-  MeshBasicMaterial,
+  HemisphereLight,
   PerspectiveCamera,
   Scene,
+  Vector2,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import GameEntity from "../entities/GameEntity";
+import GameMap from "../map/GameMap";
+import ResourceManager from "../utils/ResourceManager";
 
 class GameScene {
   //singleton pattern
@@ -55,9 +57,13 @@ class GameScene {
     // setup camera
     const aspectRatio = this._width / this._height;
     this._camera = new PerspectiveCamera(45, aspectRatio, 0.1, 1000);
-    this._camera.position.set(0, 0, 3);
+    this._camera.position.set(7, 7, 15);
 
     window.addEventListener("resize", this.resize, false);
+
+    // add game map
+    const gameMap = new GameMap(new Vector3(0, 0, 0), 15);
+    this._gameEntities.push(gameMap);
   }
 
   private resize = () => {
@@ -69,12 +75,18 @@ class GameScene {
   };
 
   public load = async () => {
+    // load game resources
+    await ResourceManager.instance.load();
+
     // load game entities
     for (let index = 0; index < this._gameEntities.length; index++) {
       const element = this._gameEntities[index];
       await element.load();
       this._scene.add(element.mesh);
     }
+
+    const light = new HemisphereLight(0xffffbb, 0x080820, 1);
+    this._scene.add(light);
   };
   public render = () => {
     requestAnimationFrame(this.render);
