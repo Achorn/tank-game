@@ -1,6 +1,7 @@
-import { Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { Box3, Mesh, MeshStandardMaterial, Sphere, Vector3 } from "three";
 import GameEntity from "./GameEntity";
 import ResourceManager from "../utils/ResourceManager";
+import GameScene from "../scene/GameScene";
 
 type KeyboardState = {
   LeftPressed: boolean;
@@ -104,6 +105,16 @@ class PlayerTank extends GameEntity {
 
     this._mesh.add(tankBodyMesh);
     this._mesh.add(tankTurretMesh);
+
+    //create collider for tank
+    const collider = new Box3()
+      .setFromObject(this._mesh)
+      .getBoundingSphere(new Sphere(this._mesh.position.clone()));
+    // this creates a sphere around the tank which is easier to calulate
+
+    // reduce radius
+    collider.radius *= 0.75;
+    this._collider = collider;
   };
   public update = (deltaT: number) => {
     let computedRotation = this._rotation;
@@ -133,8 +144,38 @@ class PlayerTank extends GameEntity {
     this._rotation = computedRotation;
     this._mesh.setRotationFromAxisAngle(new Vector3(0, 0, 1), computedRotation);
 
+    //check for solid objects before moving the tank
+    const testingSphere = this._collider?.clone() as Sphere;
+    testingSphere.center.add(computedMovement);
+    console.log(testingSphere);
+    //search for possible collisions
+    const colliders = GameScene.instance.gameEntities.filter(
+      (e) =>
+        // not self
+        e !== this &&
+        //has collider
+        e.collider &&
+        // collider is intersecting with tanks sphere
+        e.collider!.intersectsSphere(testingSphere)
+    );
+
+    // something is blocking tank!!
+    if (colliders.length) {
+      return;
+    }
+
     // update the current position by adding the movement
     this._mesh.position.add(computedMovement);
+
+    // ..also update collider
+    (this._collider as Sphere).center.add(computedMovement);
+
+    // lock camera position to tank
+    GameScene.instance.camera.position.set(
+      this._mesh.position.x,
+      this._mesh.position.y,
+      GameScene.instance.camera.position.z
+    );
   };
 }
 
