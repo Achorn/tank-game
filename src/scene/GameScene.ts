@@ -8,13 +8,13 @@ import {
   HemisphereLight,
   PerspectiveCamera,
   Scene,
-  Vector2,
   Vector3,
   WebGLRenderer,
 } from "three";
 import GameEntity from "../entities/GameEntity";
 import GameMap from "../map/GameMap";
 import ResourceManager from "../utils/ResourceManager";
+import PlayerTank from "../entities/PlayerTank";
 
 class GameScene {
   //singleton pattern
@@ -64,6 +64,9 @@ class GameScene {
     // add game map
     const gameMap = new GameMap(new Vector3(0, 0, 0), 15);
     this._gameEntities.push(gameMap);
+
+    const playerTank = new PlayerTank(new Vector3(7, 7, 0));
+    this._gameEntities.push(playerTank);
   }
 
   private resize = () => {
