@@ -3,6 +3,7 @@ import GameEntity from "./GameEntity";
 import ResourceManager from "../utils/ResourceManager";
 import GameScene from "../scene/GameScene";
 import Bullet from "./Bullet";
+import ShootEffect from "../effects/ShootEffect";
 
 type KeyboardState = {
   LeftPressed: boolean;
@@ -69,15 +70,21 @@ class PlayerTank extends GameEntity {
   private shoot = async () => {
     //create offset position (shoot a bit ahead of tank)
     const offset = new Vector3(
-      Math.sin(this._rotation) * 0.3,
-      -Math.cos(this._rotation) * 0.3,
-      0
+      Math.sin(this._rotation) * 0.45,
+      -Math.cos(this._rotation) * 0.45,
+      0.5
     );
     const shootingPosition = this._mesh.position.clone().add(offset);
     //create and load bullet
     const bullet = new Bullet(shootingPosition, this._rotation);
     await bullet.load();
+
+    // add effect
+    const shootEffect = new ShootEffect(shootingPosition, this._rotation);
+    shootEffect.load();
+
     GameScene.instance.addToScene(bullet);
+    GameScene.instance.addToScene(shootEffect);
   };
 
   public load = async () => {
@@ -175,7 +182,6 @@ class PlayerTank extends GameEntity {
     //check for solid objects before moving the tank
     const testingSphere = this._collider?.clone() as Sphere;
     testingSphere.center.add(computedMovement);
-    console.log(testingSphere);
     //search for possible collisions
     const colliders = GameScene.instance.gameEntities.filter(
       (e) =>

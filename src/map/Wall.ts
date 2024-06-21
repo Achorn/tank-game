@@ -4,7 +4,7 @@ import ResourceManager from "../utils/ResourceManager";
 
 class Wall extends GameEntity {
   constructor(position: Vector3) {
-    super(position);
+    super(position, "general");
   }
   public load = async () => {
     const geometry = new BoxGeometry(1, 1, 1);
