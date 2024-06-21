@@ -89,16 +89,20 @@ class PlayerTank extends GameEntity {
 
   public load = async () => {
     // ask for the models and textures from the resource manager
-    const tankeModel = ResourceManager.instance.getModel("tank");
-    if (!tankeModel) {
+    const tankModel = ResourceManager.instance.getModel("tank");
+    if (!tankModel) {
       throw "unable to get tank model";
     }
+
+    //entities using shared models will require a unique instance
+    const tankSceneData = tankModel.scene.clone();
+
     // model contains meshes we need for the scene
-    const tankBodyMesh = tankeModel.scene.children.find(
+    const tankBodyMesh = tankSceneData.children.find(
       (model) => model.name === "Body"
     ) as Mesh;
 
-    const tankTurretMesh = tankeModel.scene.children.find(
+    const tankTurretMesh = tankSceneData.children.find(
       (model) => model.name === "Turret"
     ) as Mesh;
 

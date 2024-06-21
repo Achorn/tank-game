@@ -17,6 +17,7 @@ import GameMap from "../map/GameMap";
 import ResourceManager from "../utils/ResourceManager";
 import PlayerTank from "../entities/PlayerTank";
 import Wall from "../map/Wall";
+import EnemyTank from "../entities/EnemyTank";
 
 class GameScene {
   //singleton pattern
@@ -82,6 +83,16 @@ class GameScene {
 
     const playerTank = new PlayerTank(new Vector3(7, 7, 0));
     this._gameEntities.push(playerTank);
+
+    const enemyTank = new EnemyTank(new Vector3(3, 3, 0));
+    this._gameEntities.push(enemyTank);
+
+    const enemyTank1 = new EnemyTank(new Vector3(10, 5, 0));
+    this._gameEntities.push(enemyTank1);
+
+    const enemyTank2 = new EnemyTank(new Vector3(12, 8, 0));
+    this._gameEntities.push(enemyTank2);
+
     this.createWalls();
   }
   private createWalls = () => {
