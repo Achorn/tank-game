@@ -1,6 +1,6 @@
 import { DodecahedronGeometry, Mesh, MeshPhongMaterial, Vector3 } from "three";
 import GameEntity from "../entities/GameEntity";
-import { randomIntInRange, randomSign } from "../utils/MathUtils";
+import { randomIntInRange, randomSin } from "../utils/MathUtils";
 
 class ShootEffect extends GameEntity {
   private _angle: number;
@@ -26,7 +26,7 @@ class ShootEffect extends GameEntity {
 
     const totalParticles = randomIntInRange(4, 9);
     for (let i = 0; i < totalParticles; i++) {
-      const angleOffset = Math.PI * 0.08 * Math.random() * randomSign();
+      const angleOffset = Math.PI * 0.08 * Math.random() * randomSin();
 
       const particleSpeed = 1.75 * Math.random() * 3;
 
@@ -41,9 +41,9 @@ class ShootEffect extends GameEntity {
       //create smoke
 
       const smokePositionOffset = new Vector3(
-        Math.random() * this._size * randomSign(),
-        Math.random() * this._size * randomSign(),
-        Math.random() * this._size * randomSign()
+        Math.random() * this._size * randomSin(),
+        Math.random() * this._size * randomSin(),
+        Math.random() * this._size * randomSin()
       );
       const smokeParticle = new Mesh(particleGeometry, smokeMaterial);
       smokeParticle.position.add(smokePositionOffset);

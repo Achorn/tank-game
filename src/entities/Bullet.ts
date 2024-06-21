@@ -9,6 +9,7 @@ import {
 } from "three";
 import GameEntity from "./GameEntity";
 import GameScene from "../scene/GameScene";
+import ExplosionEffect from "../effects/ExplosionEffect";
 
 class Bullet extends GameEntity {
   private _angle: number;
@@ -53,6 +54,12 @@ class Bullet extends GameEntity {
     //if collision detected. its no longer needed and should be removed
     if (colliders.length) {
       this._shouldDispose = true;
+
+      // explode!!!
+      const explosion = new ExplosionEffect(this._mesh.position, 1);
+      explosion.load().then(() => {
+        GameScene.instance.addToScene(explosion);
+      });
     }
   };
 
