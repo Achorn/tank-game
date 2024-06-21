@@ -4,7 +4,7 @@ import ResourceManager from "../utils/ResourceManager";
 
 class MapTile extends GameEntity {
   constructor(position: Vector3) {
-    super(position);
+    super(position, "general");
   }
   public load = async () => {
     const tileTexture = ResourceManager.instance.getRandomGroundTexture();
@@ -26,7 +26,7 @@ class GameMap extends GameEntity {
   private _tiles: MapTile[] = [];
 
   constructor(position: Vector3, size: number) {
-    super(position);
+    super(position, "general");
     this._size = size;
 
     // build grid
