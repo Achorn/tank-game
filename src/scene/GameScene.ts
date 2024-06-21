@@ -72,7 +72,7 @@ class GameScene {
     // setup camera
     const aspectRatio = this._width / this._height;
     this._camera = new PerspectiveCamera(45, aspectRatio, 0.1, 1000);
-    this._camera.position.set(7, 7, 15);
+    this._camera.position.set(7, 7, 9);
 
     window.addEventListener("resize", this.resize, false);
 
@@ -127,6 +127,8 @@ class GameScene {
   };
   public render = () => {
     requestAnimationFrame(this.render);
+    //remove entities no longer needed
+    this.disposeEntities();
     // obtain elapsed time between frames
     const deltaT = this._clock.getDelta();
     // update  the state of all entities
@@ -135,6 +137,28 @@ class GameScene {
       element.update(deltaT);
     }
     this._renderer.render(this._scene, this._camera);
+  };
+
+  // method to dynamically add entities to scene
+  public addToScene = (entity: GameEntity) => {
+    this._gameEntities.push(entity);
+    this._scene.add(entity.mesh);
+  };
+
+  //method to remove entities no longer needed
+  private disposeEntities = () => {
+    const entitiesToBeDisposed = this._gameEntities.filter(
+      (e) => e.shouldDispose
+    );
+    entitiesToBeDisposed.forEach((entity) => {
+      this._scene.remove(entity.mesh);
+      entity.dispose();
+    });
+
+    //update entity array
+    this._gameEntities = [
+      ...this._gameEntities.filter((entity) => !entity.shouldDispose),
+    ];
   };
 }
 

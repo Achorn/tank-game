@@ -2,6 +2,8 @@ import { Box3, Mesh, MeshStandardMaterial, Sphere, Vector3 } from "three";
 import GameEntity from "./GameEntity";
 import ResourceManager from "../utils/ResourceManager";
 import GameScene from "../scene/GameScene";
+import Bullet from "./Bullet";
+import ShootEffect from "../effects/ShootEffect";
 
 type KeyboardState = {
   LeftPressed: boolean;
@@ -20,12 +22,12 @@ class PlayerTank extends GameEntity {
     DownPressed: false,
   };
   constructor(position: Vector3) {
-    super(position);
+    super(position, "player");
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
   }
 
-  private handleKeyDown = (e: KeyboardEvent) => {
+  private handleKeyDown = async (e: KeyboardEvent) => {
     switch (e.key) {
       case "ArrowUp":
         this._keyboardState.UpPressed = true;
@@ -39,11 +41,14 @@ class PlayerTank extends GameEntity {
       case "ArrowRight":
         this._keyboardState.RightPressed = true;
         break;
+      case " ":
+        await this.shoot();
+        break;
       default:
         break;
     }
   };
-  private handleKeyUp = (e: KeyboardEvent) => {
+  private handleKeyUp = async (e: KeyboardEvent) => {
     switch (e.key) {
       case "ArrowUp":
         this._keyboardState.UpPressed = false;
@@ -61,6 +66,27 @@ class PlayerTank extends GameEntity {
         break;
     }
   };
+
+  private shoot = async () => {
+    //create offset position (shoot a bit ahead of tank)
+    const offset = new Vector3(
+      Math.sin(this._rotation) * 0.45,
+      -Math.cos(this._rotation) * 0.45,
+      0.5
+    );
+    const shootingPosition = this._mesh.position.clone().add(offset);
+    //create and load bullet
+    const bullet = new Bullet(shootingPosition, this._rotation);
+    await bullet.load();
+
+    // add effect
+    const shootEffect = new ShootEffect(shootingPosition, this._rotation);
+    shootEffect.load();
+
+    GameScene.instance.addToScene(bullet);
+    GameScene.instance.addToScene(shootEffect);
+  };
+
   public load = async () => {
     // ask for the models and textures from the resource manager
     const tankeModel = ResourceManager.instance.getModel("tank");
@@ -109,13 +135,22 @@ class PlayerTank extends GameEntity {
     //create collider for tank
     const collider = new Box3()
       .setFromObject(this._mesh)
-      .getBoundingSphere(new Sphere(this._mesh.position.clone()));
+      .getBoundingSphere(
+        new Sphere(
+          new Vector3(
+            this._mesh.position.x,
+            this._mesh.position.y,
+            this._mesh.position.z
+          )
+        )
+      );
     // this creates a sphere around the tank which is easier to calulate
 
     // reduce radius
     collider.radius *= 0.75;
     this._collider = collider;
   };
+
   public update = (deltaT: number) => {
     let computedRotation = this._rotation;
     let computedMovement = new Vector3(); // final movement for this frame
@@ -147,16 +182,13 @@ class PlayerTank extends GameEntity {
     //check for solid objects before moving the tank
     const testingSphere = this._collider?.clone() as Sphere;
     testingSphere.center.add(computedMovement);
-    console.log(testingSphere);
     //search for possible collisions
     const colliders = GameScene.instance.gameEntities.filter(
       (e) =>
-        // not self
-        e !== this &&
-        //has collider
-        e.collider &&
-        // collider is intersecting with tanks sphere
-        e.collider!.intersectsSphere(testingSphere)
+        e !== this && // not self
+        e.entityType !== "bullet" &&
+        e.collider && // has collider
+        e.collider!.intersectsSphere(testingSphere) // collider is intersecting with tanks sphere
     );
 
     // something is blocking tank!!
